@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificación de artículos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Clasificación de artículos</h1>
+
+    <!-- Container for the article -->
+    <div id="article-container">
+        <h2 id="article-title"></h2>
+        <img id="article-image" src="" alt="Imagen del artículo" style="max-width: 300px;">
+        <p id="article-content"></p>
+    </div>
+
+    <!-- Classification buttons -->
+    <button onclick="classifyArticle('Izquierda')">Izquierda</button>
+    <button onclick="classifyArticle('Derecha')">Derecha</button>
+
+    <!-- Message after classification -->
+    <div id="classification-message"></div>
+
+    <script>
+        let currentArticle = null;
+
+        // Fetch a random article from the backend
+        async function fetchArticle() {
+            const response = await fetch('/get-random-article');
+            const article = await response.json();
+            currentArticle = article;
+
+            // Update the article display
+            document.getElementById("article-title").textContent = article.title;
+            document.getElementById("article-image").src = article.image;
+            document.getElementById("article-content").textContent = article.content;
+        }
+
+        // Function to handle classification
+        async function classifyArticle(classification) {
+            const response = await fetch('/classify-article', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ classification: classification, articleId: currentArticle.id })
+            });
+
+            const message = await response.json();
+            document.getElementById("classification-message").textContent = message.message;
+            setTimeout(fetchArticle, 2000); // Fetch a new article after classification
+        }
+
+        // Initialize the first article on page load
+        window.onload = fetchArticle;
+    </script>
+</body>
+</html>
